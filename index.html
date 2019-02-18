@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Puzzle</title>
+
+    <style>
+          #container{
+            display:grid;
+            background-color: beige;
+
+        }
+        .dropzone{
+            outline : 0.5px solid grey;
+        }
+
+        img {
+            display: none;
+
+        }
+
+    </style>
+</head>
+<body class="body">
+    <div id="allpieces"></div>
+
+    <img src="" alt="" draggable="true">
+
+    <input type="url" placeholder="URL" id="link">
+    <input type="text" placeholder="x" id="x-value">
+    <input type="text" placeholder="y" id="y-value">
+    <input type="submit" id="submit">
+    <div id="container"></div>
+
+    <script>
+    "use strict";
+
+    let dragged;
+
+    let imageAddress;
+
+    let natHeight;
+    let natWidth;
+
+
+    document.querySelector("#submit").addEventListener("click", loadTheImage);
+
+
+    function loadTheImage() {
+        imageAddress = document.querySelector("#link").value;
+        console.log(imageAddress);
+        document.querySelector("img").src = imageAddress;
+        document.querySelector("img").onload = gridShit();
+        console.log(document.querySelector("img").naturalHeight);
+        console.log(document.querySelector("img").naturalWidth);
+
+    }
+
+    function gridShit() {
+    natHeight = document.querySelector("img").naturalHeight;
+    natWidth = document.querySelector("img").naturalWidth;
+    console.log(natHeight, natWidth);
+
+    const numOfXPieces = document.querySelector("#x-value").value;
+    const numOfYPieces = document.querySelector("#y-value").value;
+
+    console.log(numOfXPieces);
+
+    const containerWidth = natWidth;
+    const containerHeight = natHeight;
+
+    document.querySelector("#container").style.gridTemplateColumns = `repeat(${numOfXPieces},1fr)`;
+    document.querySelector("#container").style.width = `${containerWidth}px`;
+
+    for (let y = 0; y < numOfYPieces; y++) {
+
+        for (let x = 0; x < numOfXPieces; x++) {
+
+            let dropzone = document.createElement("div");
+
+            dropzone.style.height = (containerHeight / numOfYPieces) + "px";
+
+            dropzone.classList.add("dropzone");
+
+            dropzone.dataset.dropzone_id = `id${x}${y}`;
+            console.log(dropzone);
+
+            document.querySelector("#container").appendChild(dropzone);
+        }
+    }
+
+    for(let y = 0; y < numOfYPieces; y++) {
+        for(let x = 0; x < numOfXPieces; x++) {
+            let piece = document.createElement("div");
+            piece.style.height = (containerHeight / numOfYPieces) + "px";
+            piece.style.width = (containerWidth / numOfXPieces) + "px";
+
+            piece.dataset.piece_id = `id${x}${y}`;
+            piece.style.backgroundImage = "url(" + imageAddress + ")";
+            piece.style.backgroundPosition = `${y * (containerWidth / numOfYPieces)}px ${x * (containerHeight / numOfXPieces)}px`;
+
+            piece.draggable = true;
+            piece.style.position = "absolute";
+            piece.style.left = Math.random() * 600 + containerWidth + "px";
+            piece.style.top = Math.random() * (-200) + containerHeight + "px";
+
+
+            document.addEventListener("dragstart", function( event ) {
+                dragged = event.target;
+                event.target.style.opacity = .5;
+            }, false);
+
+            document.addEventListener("dragend", function( event ) {
+                event.target.style.opacity = "";
+            }, false);
+
+
+            document.addEventListener("dragover", function( event ) {
+                event.preventDefault();
+            }, false);
+
+            document.addEventListener("dragenter", function( event ) {
+                if ( event.target.className == "dropzone" ) {
+                    event.target.style.background = "purple";
+                }
+
+            }, false);
+
+            document.addEventListener("dragleave", function( event ) {
+                if ( event.target.className == "dropzone" ) {
+                    event.target.style.background = "";
+                }
+
+            }, false);
+
+            document.addEventListener("drop", function( event ) {
+                console.log(event.target.className);
+                event.preventDefault();
+                if ( event.target.className == "dropzone" ) {
+                    event.target.style.background = "";
+                    dragged.parentNode.removeChild( dragged );
+                    event.target.appendChild( dragged );
+                    dragged.style.left = event.target.style.left;
+                    dragged.style.top = event.target.style.top;
+                    testIfSolved()
+                }
+                if ( event.target.className == "body") {
+                    dragged.style.left = event.pageX + "px";
+                    dragged.style.top = event.pageY + "px";
+                }
+            }, false);
+
+            document.querySelector("#allpieces").appendChild(piece);
+        }
+    }
+}
+
+/* function testIfSolved() {
+    document.querySelectorAll(".dropzone").forEach(eachZone => {
+        if(eachZone.dataset.piece_id != eachZone.dataset.dropzone_id) {
+            console.log("forkert lagt");
+           document.querySelector("#container").style.outline = "thick solid red";
+        }
+        if(eachZone.dataset.piece_id == eachZone.dataset.dropzone_id) {
+            console.log("Bliver kaldt");
+            document.querySelector("#container").style.outline = "thick solid green";
+        }
+    });
+} */
+
+    </script>
+</body>
+</html>
